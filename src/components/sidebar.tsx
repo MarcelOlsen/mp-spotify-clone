@@ -5,6 +5,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { ReactNode } from "react";
 import { twMerge } from "tailwind-merge";
+import { Library } from "./library";
 
 type SidebarProps = {
   children: ReactNode;
@@ -13,6 +14,7 @@ type SidebarProps = {
     title: string;
     artist: string;
     duration: number;
+    imageUrl: string;
   }[]
 }
 
@@ -32,27 +34,30 @@ const navbarLink = [
 export const Sidebar = ({ children, songs }: SidebarProps) => {
   const pathname = usePathname()
 
+
+
   return (
     <div className="flex">
       {/* Sidebar */}
-      <div className="w-[300px] bg-red-500 h-screen">
+      <div className="w-[300px] h-screen px-4 py-3 flex flex-col gap-y-2">
         {/* Main Section */}
-        <div className="rounded-lg bg-yellow-200 w-full px-3 py-2 flex flex-col gap-y-2">
+        <div className="rounded-lg bg-neutral-900 w-full px-3 py-3 flex flex-col gap-y-4">
           <Link href="/" className={twMerge(
-            "text-black flex items-center gap-x-1",
+            "text-neutral-400 flex items-center gap-x-1 font-semibold",
             pathname === "/" && "text-white"
           )}>
-            <HouseIcon className="size-5" />
+            <HouseIcon className="size-6" />
             Home
           </Link>
           <Link href="/search" className={twMerge(
-            "text-black flex items-center gap-x-1",
+            "text-neutral-400 flex items-center gap-x-1 font-semibold",
             pathname === "/search" && "text-white"
           )}>
-            <SearchIcon className="size-5" />
+            <SearchIcon className="size-6" />
             Search
           </Link>
         </div>
+        <Library songs={songs} />
       </div>
 
       {/* Main content */}
