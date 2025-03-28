@@ -18,19 +18,6 @@ type SidebarProps = {
   }[]
 }
 
-const navbarLink = [
-  {
-    title: "Home",
-    href: "/",
-    icon: HouseIcon
-  },
-  {
-    title: "Search",
-    href: "/search",
-    icon: SearchIcon
-  },
-]
-
 export const Sidebar = ({ children, songs }: SidebarProps) => {
   const pathname = usePathname()
 
@@ -61,7 +48,7 @@ export const Sidebar = ({ children, songs }: SidebarProps) => {
       </div>
 
       {/* Main content */}
-      <main>
+      <main className="h-full flex-1 py-2">
         {children}
       </main>
     </div>

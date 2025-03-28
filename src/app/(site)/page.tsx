@@ -1,7 +1,11 @@
+import { Header } from "@/components/header";
+
 const Home = () => {
   return (
-    <div className="flex">
-      main
+    <div className="w-full">
+      <Header>
+        main
+      </Header>
     </div>
   );
 };

@@ -1,7 +1,9 @@
 'use client'
 
-import { Sidebar } from "@/components/sidebar";
-import axios from "axios";
+import { supabaseClient } from "@/libs/supabaseClient";
+import { Auth } from "@supabase/auth-ui-react";
+import { ThemeSupa } from '@supabase/auth-ui-shared';
+import { Session } from "@supabase/supabase-js";
 import { Figtree } from "next/font/google";
 import { useEffect, useState } from "react";
 import "./globals.css";
@@ -16,31 +18,39 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const [songs, setSongs] = useState([]);
-
-  const fetchSongs = async () => {
-    const response = await axios.get("https://api.mockapi.com/api/songs", {
-      headers: {
-        "x-api-key": "728dbfe57c5e4086b06334a1c489e0bb"
-      }
-    })
-
-    setSongs(response.data);
-  }
+  const [session, setSession] = useState<Session | null>(null)
 
   useEffect(() => {
-    fetchSongs()
+    supabaseClient.auth.getSession().then(({ data: { session } }) => {
+      setSession(session)
+    })
+    const {
+      data: { subscription },
+    } = supabaseClient.auth.onAuthStateChange((_event, session) => {
+      setSession(session)
+    })
+    return () => subscription.unsubscribe()
   }, [])
-
-  return (
-    <html lang="en">
-      <body
-        className={`${figtree.className} antialiased`}
-      >
-        <Sidebar songs={songs}>
-          {children}
-        </Sidebar>
-      </body>
-    </html>
-  );
+  if (!session) {
+    return (
+      <html lang="en">
+        <body
+          className={`${figtree.className} antialiased`}
+        >
+          <Auth supabaseClient={supabaseClient} appearance={{ theme: ThemeSupa }} />
+        </body>
+      </html>
+    )
+  }
+  else {
+    return (
+      <html lang="en">
+        <body
+          className={`${figtree.className} antialiased`}
+        >
+          logged in!
+        </body>
+      </html>
+    );
+  }
 }
