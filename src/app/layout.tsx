@@ -1,12 +1,13 @@
 'use client'
 
 import { supabaseClient } from "@/libs/supabaseClient";
-import { Auth } from "@supabase/auth-ui-react";
-import { ThemeSupa } from '@supabase/auth-ui-shared';
 import { Session } from "@supabase/supabase-js";
 import { Figtree } from "next/font/google";
 import { useEffect, useState } from "react";
 import "./globals.css";
+import { Sidebar } from "@/components/sidebar";
+import { useRouter } from "next/navigation";
+import { Auth } from "@supabase/auth-ui-react";
 
 const figtree = Figtree({
   variable: "--font-figtree",
@@ -19,6 +20,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   const [session, setSession] = useState<Session | null>(null)
+  const router = useRouter()
 
   useEffect(() => {
     supabaseClient.auth.getSession().then(({ data: { session } }) => {
@@ -31,26 +33,22 @@ export default function RootLayout({
     })
     return () => subscription.unsubscribe()
   }, [])
-  if (!session) {
-    return (
-      <html lang="en">
-        <body
-          className={`${figtree.className} antialiased`}
-        >
-          <Auth supabaseClient={supabaseClient} appearance={{ theme: ThemeSupa }} />
-        </body>
-      </html>
-    )
-  }
-  else {
-    return (
-      <html lang="en">
-        <body
-          className={`${figtree.className} antialiased`}
-        >
-          logged in!
-        </body>
-      </html>
-    );
-  }
+
+  return (
+    <html lang="en">
+      <body
+        className={`${figtree.className} antialiased`}
+      >
+        {!!session ? (
+          <Sidebar songs={[]}>
+            {children}
+          </Sidebar>
+        ) : (
+          <Auth
+            supabaseClient={supabaseClient}
+          />
+        )}
+      </body>
+    </html>
+  );
 }
