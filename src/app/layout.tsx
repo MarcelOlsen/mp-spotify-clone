@@ -1,13 +1,16 @@
 'use client'
 
+import { Sidebar } from "@/components/sidebar";
+import { queryClient } from "@/libs/queryClient";
 import { supabaseClient } from "@/libs/supabaseClient";
+import { Auth } from "@supabase/auth-ui-react";
+import { ThemeSupa } from '@supabase/auth-ui-shared';
 import { Session } from "@supabase/supabase-js";
+import { QueryClientProvider } from "@tanstack/react-query";
 import { Figtree } from "next/font/google";
+import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import "./globals.css";
-import { Sidebar } from "@/components/sidebar";
-import { useRouter } from "next/navigation";
-import { Auth } from "@supabase/auth-ui-react";
 
 const figtree = Figtree({
   variable: "--font-figtree",
@@ -39,15 +42,17 @@ export default function RootLayout({
       <body
         className={`${figtree.className} antialiased`}
       >
-        {!!session ? (
-          <Sidebar songs={[]}>
-            {children}
-          </Sidebar>
-        ) : (
-          <Auth
-            supabaseClient={supabaseClient}
-          />
-        )}
+        {
+          !session ? (
+            <Auth supabaseClient={supabaseClient} appearance={{ theme: ThemeSupa }} />
+          ) : (
+            <QueryClientProvider client={queryClient}>
+              <Sidebar>
+                {children}
+              </Sidebar>
+            </QueryClientProvider>
+          )
+        }
       </body>
     </html>
   );

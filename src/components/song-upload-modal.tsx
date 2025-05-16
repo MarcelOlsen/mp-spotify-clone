@@ -9,7 +9,13 @@ import { supabaseClient } from "@/libs/supabaseClient";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
+import { twMerge } from "tailwind-merge";
 import { z } from "zod";
+
+interface SongUploadModalProps {
+  open: boolean;
+  setIsOpen: (isOpen: boolean) => void;
+}
 
 const uploadFormSchema = z.object({
   title: z.string().min(1, "Title must be at least 1 character long").max(100),
@@ -25,7 +31,7 @@ const uploadFormSchema = z.object({
 
 type UploadFormValues = z.infer<typeof uploadFormSchema>;
 
-export const SongUploadModal = () => {
+export const SongUploadModal = ({ open, setIsOpen }: SongUploadModalProps) => {
   const [isLoading, setIsLoading] = useState<boolean>(false);
 
   const {
@@ -90,6 +96,7 @@ export const SongUploadModal = () => {
       console.error(error);
     } finally {
       setIsLoading(false);
+      setIsOpen(false);
     }
   };
 
@@ -104,7 +111,10 @@ export const SongUploadModal = () => {
       };
 
   return (
-    <div className="fixed inset-0 flex items-center justify-center bg-opacity-25 bg-transparent">
+    <div className={twMerge(
+      "fixed inset-0 flex items-center justify-center bg-opacity-25 bg-transparent",
+      open ? "block" : "hidden"
+    )}>
       <div className="bg-neutral-800 rounded-lg p-8 w-full max-w-md">
         <h2 className="text-2xl font-bold mb-6 text-white">Upload a Song</h2>
 

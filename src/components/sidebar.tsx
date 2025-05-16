@@ -1,6 +1,8 @@
 'use client'
 
-import { HouseIcon, SearchIcon } from "lucide-react";
+import { supabaseClient } from "@/libs/supabaseClient";
+import { useQuery } from "@tanstack/react-query";
+import { HouseIcon, Loader2Icon, SearchIcon } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { ReactNode } from "react";
@@ -9,19 +11,18 @@ import { Library } from "./library";
 
 type SidebarProps = {
   children: ReactNode;
-  songs: {
-    id: string;
-    title: string;
-    artist: string;
-    duration: number;
-    imageUrl: string;
-  }[]
 }
 
-export const Sidebar = ({ children, songs }: SidebarProps) => {
+export const Sidebar = ({ children }: SidebarProps) => {
+  const { data: songs, isPending, error } = useQuery({
+    queryKey: ["songs"],
+    queryFn: async () => {
+      const req = await supabaseClient.from("songs").select()
+      return req.data
+    }
+  });
+
   const pathname = usePathname()
-
-
 
   return (
     <div className="flex">
@@ -44,7 +45,16 @@ export const Sidebar = ({ children, songs }: SidebarProps) => {
             Search
           </Link>
         </div>
-        <Library songs={songs} />
+        {
+          isPending ? (
+            <div>
+              <Loader2Icon className="animate-spin" />
+            </div>
+          ) : (
+            <Library songs={songs} />
+          )
+        }
+
       </div>
 
       {/* Main content */}
