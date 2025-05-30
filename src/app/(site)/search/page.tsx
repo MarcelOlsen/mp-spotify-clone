@@ -6,6 +6,7 @@ import { useDebounce } from "use-debounce";
 
 import { supabaseClient } from "@/libs/supabaseClient";
 import { Input } from "@/components/ui/input";
+import { SearchResult } from "@/components/search-result";
 
 const SearchPage = () => {
     const [searchQuery, setSearchQuery] = useState("");
@@ -27,14 +28,15 @@ const SearchPage = () => {
     });
 
     return (
-        <div className="flex items-center justify-center text-white">
+        <div className="flex flex-col items-center justify-center gap-6 text-white">
             <Input
                 type="text"
                 placeholder="Search..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
+                className="w-1/2"
             />
-            {JSON.stringify(songs)}
+            {songs?.map((song) => <SearchResult key={song.id} song={song} />)}
         </div>
     );
 };
