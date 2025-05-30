@@ -9,8 +9,9 @@ import { supabaseClient } from "@/libs/supabaseClient";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
-import { twMerge } from "tailwind-merge";
 import { z } from "zod";
+import { Dialog, DialogContent, DialogTitle } from "./ui/dialog";
+import { Button } from "./ui/button";
 
 interface SongUploadModalProps {
     open: boolean;
@@ -32,7 +33,7 @@ const uploadFormSchema = z.object({
     imageFile: z.instanceof(File, {
         message: "Please select a valid image file",
     }),
-    duration: z.number().min(1, "Duration must be at least 1 second").max(3600),
+    duration: z.string().min(1, "Duration must be at least 1 second").max(3600),
 });
 
 type UploadFormValues = z.infer<typeof uploadFormSchema>;
@@ -88,7 +89,7 @@ export const SongUploadModal = ({ open, setIsOpen }: SongUploadModalProps) => {
                 song_path: songAssetName,
                 image_path: imageAssetName,
                 author: data.author,
-                user_id: user.id,
+                duration: parseInt(data.duration),
             };
 
             const { error: tableError } = await supabaseClient
@@ -96,6 +97,8 @@ export const SongUploadModal = ({ open, setIsOpen }: SongUploadModalProps) => {
                 .insert(newSong);
 
             if (tableError) throw tableError;
+
+            console.log("uploading song");
 
             // Reset form on success
             reset();
@@ -107,16 +110,6 @@ export const SongUploadModal = ({ open, setIsOpen }: SongUploadModalProps) => {
         }
     };
 
-    function getDuration(src) {
-        return new Promise(function (resolve) {
-            const audio = new Audio();
-            audio.addEventListener("loadedmetadata", function () {
-                resolve(audio.duration);
-            });
-            audio.src = src;
-        });
-    }
-
     // Handle file input changes
     const handleFileChange =
         (fieldName: "songFile" | "imageFile") =>
@@ -125,26 +118,14 @@ export const SongUploadModal = ({ open, setIsOpen }: SongUploadModalProps) => {
             if (file) {
                 setValue(fieldName, file);
             }
-
-            const duration = await getDuration(file).then(
-                (duration) => duration,
-            );
-            if (duration) {
-                setValue("duration", duration);
-            }
         };
 
     return (
-        <div
-            className={twMerge(
-                "fixed inset-0 flex items-center justify-center bg-opacity-25 bg-transparent",
-                open ? "block" : "hidden",
-            )}
-        >
-            <div className="bg-neutral-800 rounded-lg p-8 w-full max-w-md">
-                <h2 className="text-2xl font-bold mb-6 text-white">
+        <Dialog open={open} onOpenChange={setIsOpen}>
+            <DialogContent className="bg-neutral-800 rounded-lg p-8 w-full max-w-md">
+                <DialogTitle className="text-2xl font-bold mb-6 text-white">
                     Upload a Song
-                </h2>
+                </DialogTitle>
 
                 <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
                     <div>
@@ -185,6 +166,26 @@ export const SongUploadModal = ({ open, setIsOpen }: SongUploadModalProps) => {
                         {errors.author && (
                             <p className="mt-1 text-sm text-red-400">
                                 {errors.author.message}
+                            </p>
+                        )}
+                    </div>
+                    <div>
+                        <label
+                            className="block text-sm font-medium text-gray-200 mb-2"
+                            htmlFor="author"
+                        >
+                            Duration
+                        </label>
+                        <input
+                            id="duration"
+                            type="number"
+                            {...register("duration")}
+                            className="w-full px-3 py-2 bg-neutral-700 border border-neutral-600 text-white rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
+                            placeholder="Enter duration"
+                        />
+                        {errors.duration && (
+                            <p className="mt-1 text-sm text-red-400">
+                                {errors.duration.message}
                             </p>
                         )}
                     </div>
@@ -283,15 +284,15 @@ export const SongUploadModal = ({ open, setIsOpen }: SongUploadModalProps) => {
                         )}
                     </div>
 
-                    <button
-                        type="submit"
+                    <Button
+                        onClick={() => console.log("submitted")}
                         disabled={isLoading}
                         className="w-full bg-green-500 text-white py-3 px-4 rounded-full font-bold hover:bg-green-600 transition disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                         {isLoading ? "Uploading..." : "Upload Song"}
-                    </button>
+                    </Button>
                 </form>
-            </div>
-        </div>
+            </DialogContent>
+        </Dialog>
     );
 };
