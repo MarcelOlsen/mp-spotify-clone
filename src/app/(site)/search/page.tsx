@@ -12,11 +12,7 @@ const SearchPage = () => {
     const [searchQuery, setSearchQuery] = useState("");
     const [debouncedSearchQuery] = useDebounce(searchQuery, 500);
 
-    const {
-        data: songs,
-        isLoading,
-        isError,
-    } = useQuery({
+    const { data: songs } = useQuery({
         queryKey: ["search", debouncedSearchQuery],
         queryFn: async () => {
             const { data: songs } = await supabaseClient
