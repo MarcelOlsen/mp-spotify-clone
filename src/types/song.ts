@@ -3,5 +3,6 @@ export type Song = {
     title: string;
     author: string;
     duration: number;
-    imageUrl: string;
+    image_path: string;
+    song_path: string;
 };
